@@ -9,7 +9,8 @@ library(tidyverse)
 library(XML)
 library(xml2)
 library(rvest)
-
+library(DBI)
+library(RMariaDB)
 ```
 
 ```{r}
@@ -36,7 +37,8 @@ hp40 <- "https://www.mountainproject.com/area/106094862/horse-pens-40"
 links <- scrapeLinks(mtproj_url)
 
 
-unique(html_attr(html_nodes(read_html(mtproj_url), 'strong .float-xs-left'), 'href'))
+state_links <- unique(html_attr(html_nodes(read_html(mtproj_url), 'strong .float-xs-left'), 'href'))[1:48]
+state_links
 
 
 get_subarea_urls <- function(x) {
@@ -51,6 +53,8 @@ get_boulder_urls <- function(x) {
   return(links)
 }
 
+con <- dbConnect(MariaDB(), group = "mtproj")
+dbListTables(con)
 
 system.time(alabama_climbs <- sapply(alabama, get_subarea_urls))
 all_alabama_routes <- unlist(lapply(lapply(alabama_climbs, unlist), as.character))
